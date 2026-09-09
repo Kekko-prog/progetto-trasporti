@@ -32,23 +32,47 @@
             const response = await fetch(`http://localhost:5000/api/itinerario/${orario}`);
             const dati = await response.json();
 
+            // Se l'API restituisce un errore generico
+            if (dati.errore) {
+                divRisultato.innerHTML = `<p style='color:red;'>Errore dal server: ${dati.errore}</p>`;
+                return;
+            }
+
+            // Se l'algoritmo capisce che non ci sono treni/bus per quell'orario
+            if (dati.fattibile === false) {
+                divRisultato.innerHTML = `
+                    <div style="background: #ffcccc; padding: 15px; border-radius: 10px; border: 1px solid #ff9999;">
+                        <h3 style="color: #cc0000; margin-top: 0;">Itinerario non fattibile</h3>
+                        <p style="color: #333;">${dati.messaggio}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Se l'itinerario è calcolato con successo
             divRisultato.innerHTML = `
+                <div style="background: #d4edda; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; border: 1px solid #c3e6cb;">
+                    <h3 style="color: #155724; margin: 0;">Devi uscire di casa entro le <strong>${dati.devi_uscire_di_casa_entro}</strong></h3>
+                </div>
+                
                 <div class="step">
                     <strong>1. ${dati.step_1.mezzo}</strong><br>
-                    ${dati.step_1.partenza} - ${dati.step_1.arrivo} (${dati.step_1.ritardo})
+                    ${dati.step_1.partenza} - ${dati.step_1.arrivo} <br>
+                    <small style="color: #555;">Status: ${dati.step_1.status}</small>
                 </div>
                 <div class="step">
                     <strong>2. ${dati.step_2.mezzo}</strong><br>
-                    ${dati.step_2.partenza} - ${dati.step_2.arrivo} (${dati.step_2.ritardo})<br>
-                    <small style="color: red;">${dati.step_2.status}</small>
+                    ${dati.step_2.partenza} - ${dati.step_2.arrivo} <br>
+                    <small style="color: ${dati.step_2.status.includes('In orario') ? 'green' : 'red'};">${dati.step_2.status}</small>
                 </div>
                 <div class="step">
                     <strong>3. ${dati.step_3.mezzo}</strong><br>
-                    ${dati.step_3.partenza} - ${dati.step_3.arrivo}
+                    ${dati.step_3.partenza} - ${dati.step_3.arrivo} <br>
+                    <small style="color: #555;">Status: ${dati.step_3.status}</small>
                 </div>
             `;
         } catch (error) {
-            divRisultato.innerHTML = "<p style='color:red;'>Errore di connessione al server.</p>";
+            divRisultato.innerHTML = "<p style='color:red;'>Impossibile contattare il server. Assicurati che Flask sia avviato.</p>";
         }
     }
 </script>
