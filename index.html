@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinerario Monte Sant'Angelo</title>
+    <style>
+        /* Qui andrà il tuo CSS glassmorphism */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #f0f0f5; }
+        .container { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; }
+        .step { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Quando vuoi arrivare in università?</h2>
+    <input type="time" id="orarioTarget" value="09:30">
+    <button onclick="calcolaPercorso()">Calcola Itinerario</button>
+
+    <div id="risultato" style="margin-top: 20px;"></div>
+</div>
+
+<script>
+    async function calcolaPercorso() {
+        const orario = document.getElementById("orarioTarget").value;
+        const divRisultato = document.getElementById("risultato");
+        divRisultato.innerHTML = "<p>Calcolo in corso sui server...</p>";
+
+        try {
+            // Quando pubblicherai il backend online, cambierai "localhost:5000" con il vero link
+            const response = await fetch(`http://localhost:5000/api/itinerario/${orario}`);
+            const dati = await response.json();
+
+            divRisultato.innerHTML = `
+                <div class="step">
+                    <strong>1. ${dati.step_1.mezzo}</strong><br>
+                    ${dati.step_1.partenza} - ${dati.step_1.arrivo} (${dati.step_1.ritardo})
+                </div>
+                <div class="step">
+                    <strong>2. ${dati.step_2.mezzo}</strong><br>
+                    ${dati.step_2.partenza} - ${dati.step_2.arrivo} (${dati.step_2.ritardo})<br>
+                    <small style="color: red;">${dati.step_2.status}</small>
+                </div>
+                <div class="step">
+                    <strong>3. ${dati.step_3.mezzo}</strong><br>
+                    ${dati.step_3.partenza} - ${dati.step_3.arrivo}
+                </div>
+            `;
+        } catch (error) {
+            divRisultato.innerHTML = "<p style='color:red;'>Errore di connessione al server.</p>";
+        }
+    }
+</script>
+
+</body>
+</html>
